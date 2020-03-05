@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.PointF
+import android.os.Build
 import android.os.Handler
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ViewGroup
@@ -35,7 +37,7 @@ class NumberPicker @JvmOverloads constructor(
         context: Context,
         attrs: AttributeSet? = null,
         defStyleAttr: Int = R.attr.pickerStyle,
-        defStyleRes: Int = R.style.NumberPicker_Filled) : LinearLayout(context, attrs, defStyleAttr, defStyleRes) {
+        defStyleRes: Int = R.style.NumberPicker_Filled) : LinearLayout(ContextThemeWrapper(context, defStyleRes), attrs, defStyleAttr) {
 
     interface OnNumberPickerChangeListener {
         fun onProgressChanged(numberPicker: NumberPicker, progress: Int, fromUser: Boolean)
@@ -211,9 +213,18 @@ class NumberPicker @JvmOverloads constructor(
     }
 
     private fun inflateChildren() {
+        val selectableItemBackground = TypedValue()
+        context.theme.resolveAttribute(
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                android.R.attr.selectableItemBackgroundBorderless
+            } else {
+                android.R.attr.selectableItemBackground
+            }, selectableItemBackground, true
+        )
+
         upButton = AppCompatImageButton(context)
         upButton.setImageResource(R.drawable.arrow_up_selector_24)
-        upButton.setBackgroundResource(R.drawable.arrow_up_background)
+        upButton.setBackgroundResource(selectableItemBackground.resourceId)
 
         if (data.orientation == HORIZONTAL) {
             upButton.rotation = 90f
@@ -230,7 +241,7 @@ class NumberPicker @JvmOverloads constructor(
 
         downButton = AppCompatImageButton(context)
         downButton.setImageResource(R.drawable.arrow_up_selector_24)
-        downButton.setBackgroundResource(R.drawable.arrow_up_background)
+        downButton.setBackgroundResource(selectableItemBackground.resourceId)
         downButton.rotation = if (data.orientation == VERTICAL) 180f else -90f
 
         val params1 = LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)

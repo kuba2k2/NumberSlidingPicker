@@ -70,7 +70,7 @@
 
     <style name="NumberPicker.ArrowStyle" parent="ArrowStyle">
         <item name="android:src">@drawable/arrow_up_selector_24</item>
-        <item name="android:background">@drawable/arrow_up_background</item>
+        <item name="android:background">?selectableItemBackgroundBorderless</item>
     </style>
 
     <style name="NumberPicker.EditTextStyle" parent="Widget.AppCompat.EditText">

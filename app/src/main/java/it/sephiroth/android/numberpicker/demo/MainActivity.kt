@@ -43,7 +43,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     inner class Presenter {
-        fun onProgressChanged(numberPicker: NumberPicker, progress: Int, fromUser: Boolean) {
+        fun onProgressChanged(numberPicker: NumberPicker, progress: Float, fromUser: Boolean) {
             Timber.d("onProgressChanged")
             model.globalProgress.value = progress
         }

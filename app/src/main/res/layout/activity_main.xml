@@ -37,6 +37,7 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:picker_stepSize="0.01"
             app:picker_max="@{model.maxValue}"
             app:picker_min="@{model.minValue}" />
 
@@ -64,6 +65,7 @@
             app:layout_constraintEnd_toEndOf="@+id/numberPicker"
             app:layout_constraintTop_toBottomOf="@+id/numberPicker"
             app:picker_editTextStyle="@style/NumberPicker.EditTextStyle.Disabled"
+            app:picker_stepSize="0.01"
             app:picker_max="@{model.maxValue}"
             app:picker_min="@{model.minValue}" />
 
@@ -90,6 +92,7 @@
             android:progress="@{model.defaultValue}"
             app:layout_constraintEnd_toEndOf="@+id/numberPicker2"
             app:layout_constraintTop_toBottomOf="@+id/numberPicker2"
+            app:picker_stepSize="0.01"
             app:picker_max="@{model.maxValue}"
             app:picker_min="@{model.minValue}"
             app:picker_tracker="exponential" />
@@ -118,6 +121,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView3"
+            app:picker_stepSize="0.01"
             app:picker_max="@{model.maxValue}"
             app:picker_min="@{model.minValue}"
             app:picker_tracker="exponential" />

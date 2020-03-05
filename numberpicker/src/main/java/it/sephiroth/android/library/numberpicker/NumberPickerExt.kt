@@ -4,7 +4,7 @@ package it.sephiroth.android.library.numberpicker
 inline fun NumberPicker.doOnProgressChanged(
         crossinline action: (
                 numberPicker: NumberPicker,
-                progress: Int,
+                progress: Float,
                 formUser: Boolean) -> Unit) =
         addProgressChangedListener(progressChanged = action)
 
@@ -18,7 +18,7 @@ inline fun NumberPicker.doOnStopTrackingTouch(crossinline action: (numberPicker:
 inline fun NumberPicker.addProgressChangedListener(
         crossinline progressChanged: (
                 numberPicker: NumberPicker,
-                progress: Int,
+                progress: Float,
                 formUser: Boolean
                                      ) -> Unit = { _, _, _ -> },
 
@@ -29,7 +29,7 @@ inline fun NumberPicker.addProgressChangedListener(
                                                   ): NumberPicker.OnNumberPickerChangeListener {
     val listener = object : NumberPicker.OnNumberPickerChangeListener {
 
-        override fun onProgressChanged(numberPicker: NumberPicker, progress: Int, fromUser: Boolean) {
+        override fun onProgressChanged(numberPicker: NumberPicker, progress: Float, fromUser: Boolean) {
             progressChanged.invoke(numberPicker, progress, fromUser)
         }
 
@@ -48,7 +48,7 @@ inline fun NumberPicker.addProgressChangedListener(
 
 class _OnNumberPickerChangeListener : NumberPicker.OnNumberPickerChangeListener {
 
-    override fun onProgressChanged(numberPicker: NumberPicker, progress: Int, fromUser: Boolean) {
+    override fun onProgressChanged(numberPicker: NumberPicker, progress: Float, fromUser: Boolean) {
         _onProgressChanged?.invoke(numberPicker, progress, fromUser)
     }
 
@@ -60,7 +60,7 @@ class _OnNumberPickerChangeListener : NumberPicker.OnNumberPickerChangeListener 
         _onStopTrackingTouch?.invoke(numberPicker)
     }
 
-    fun onProgressChanged(func: (NumberPicker, Int, Boolean) -> Unit) {
+    fun onProgressChanged(func: (NumberPicker, Float, Boolean) -> Unit) {
         _onProgressChanged = func
     }
 
@@ -72,7 +72,7 @@ class _OnNumberPickerChangeListener : NumberPicker.OnNumberPickerChangeListener 
         _onStopTrackingTouch = func
     }
 
-    private var _onProgressChanged: ((NumberPicker, Int, Boolean) -> Unit)? = null
+    private var _onProgressChanged: ((NumberPicker, Float, Boolean) -> Unit)? = null
     private var _onStartTrackingTouch: ((NumberPicker) -> Unit)? = null
     private var _onStopTrackingTouch: ((NumberPicker) -> Unit)? = null
 }

@@ -9,13 +9,13 @@ import androidx.databinding.InverseBindingMethods
 class NumberPickerBindingAdapter {
     companion object {
         @BindingAdapter("progress")
-        fun bindProgress(view: NumberPicker, value: Int) {
+        fun bindProgress(view: NumberPicker, value: Float) {
             view.progress = value
         }
 
         @BindingAdapter(value = ["picker_min", "picker_max"], requireAll = false)
         @JvmStatic
-        fun bindMinAndMax(view: NumberPicker, minValue: Int?, maxValue: Int?) {
+        fun bindMinAndMax(view: NumberPicker, minValue: Float?, maxValue: Float?) {
             if (null == minValue && null == maxValue) {
                 throw java.lang.IllegalArgumentException("At least one value must be passed to picker_min or picker_max")
             }
@@ -41,7 +41,7 @@ class NumberPickerBindingAdapter {
                 view.numberPickerChangeListener = null
             } else {
                 view.numberPickerChangeListener = object : NumberPicker.OnNumberPickerChangeListener {
-                    override fun onProgressChanged(numberPicker: NumberPicker, progress: Int, fromUser: Boolean) {
+                    override fun onProgressChanged(numberPicker: NumberPicker, progress: Float, fromUser: Boolean) {
                         progressListener?.onProgressChanged(numberPicker, progress, fromUser)
                     }
 
@@ -67,7 +67,7 @@ class NumberPickerBindingAdapter {
     }
 
     interface OnProgressChanged {
-        fun onProgressChanged(seekBar: NumberPicker, progress: Int, fromUser: Boolean)
+        fun onProgressChanged(seekBar: NumberPicker, progress: Float, fromUser: Boolean)
 
     }
 }

@@ -26,6 +26,7 @@ import it.sephiroth.android.library.uigestures.*
 import it.sephiroth.android.library.xtooltip.ClosePolicy
 import it.sephiroth.android.library.xtooltip.Tooltip
 import timber.log.Timber
+import java.lang.Math.round
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
@@ -40,7 +41,7 @@ class NumberPicker @JvmOverloads constructor(
         defStyleRes: Int = R.style.NumberPicker_Filled) : LinearLayout(ContextThemeWrapper(context, defStyleRes), attrs, defStyleAttr) {
 
     interface OnNumberPickerChangeListener {
-        fun onProgressChanged(numberPicker: NumberPicker, progress: Int, fromUser: Boolean)
+        fun onProgressChanged(numberPicker: NumberPicker, progress: Float, fromUser: Boolean)
         fun onStartTrackingTouch(numberPicker: NumberPicker)
         fun onStopTrackingTouch(numberPicker: NumberPicker)
     }
@@ -66,7 +67,7 @@ class NumberPicker @JvmOverloads constructor(
 
     private lateinit var data: Data
 
-    private var callback = { newValue: Int ->
+    private var callback = { newValue: Float ->
         setProgress(newValue)
     }
 
@@ -74,8 +75,8 @@ class NumberPicker @JvmOverloads constructor(
 
     private val longGestureListener = { it: UIGestureRecognizer ->
         Timber.i("longGestureListener = ${it.state}")
-        when {
-            it.state == UIGestureRecognizer.State.Began -> {
+        when (it.state) {
+            UIGestureRecognizer.State.Began -> {
                 requestFocus()
                 editText.isSelected = false
                 editText.clearFocus()
@@ -83,13 +84,11 @@ class NumberPicker @JvmOverloads constructor(
                 tracker.begin(it.downLocationX, it.downLocationY)
                 startInteraction()
             }
-
-            it.state == UIGestureRecognizer.State.Ended -> {
+            UIGestureRecognizer.State.Ended -> {
                 tracker.end()
                 endInteraction()
             }
-
-            it.state == UIGestureRecognizer.State.Changed -> {
+            UIGestureRecognizer.State.Changed -> {
                 var diff =
                         if (data.orientation == VERTICAL) it.currentLocationY - it.downLocationY else it.currentLocationX - it.downLocationX
                 if (diff > tracker.minDistance) {
@@ -118,10 +117,18 @@ class NumberPicker @JvmOverloads constructor(
     }
 
     @Suppress("MemberVisibilityCanBePrivate")
-    fun setProgress(value: Int, fromUser: Boolean = true) {
+    fun setProgress(value: Float, fromUser: Boolean = true) {
         // Timber.i("setProgress($value, $fromUser)")
         if (value != data.value) {
             data.value = value
+            if (stepSize != 0f) {
+                if (data.value % stepSize != 0f) {
+                    if (stepSize >= 1f)
+                        data.value -= (data.value % stepSize)
+                    else
+                        data.value = kotlin.math.round(data.value * (1/stepSize)) / (1/stepSize)
+                }
+            }
             tooltip?.update(data.value.toString())
 
             if (editText.text.toString() != data.value.toString())
@@ -131,23 +138,23 @@ class NumberPicker @JvmOverloads constructor(
         }
     }
 
-    var progress: Int
+    var progress: Float
         get() = data.value
         set(value) = setProgress(value, false)
 
-    var minValue: Int
+    var minValue: Float
         get() = data.minValue
         set(value) {
             data.minValue = value
         }
 
-    var maxValue: Int
+    var maxValue: Float
         get() = data.maxValue
         set(value) {
             data.maxValue = value
         }
 
-    var stepSize: Int
+    var stepSize: Float
         get() = data.stepSize
         set(value) {
             data.stepSize = value
@@ -165,11 +172,11 @@ class NumberPicker @JvmOverloads constructor(
 
         val array = context.theme.obtainStyledAttributes(attrs, R.styleable.NumberPicker, defStyleAttr, defStyleRes)
         try {
-            val maxValue = array.getInteger(R.styleable.NumberPicker_picker_max, 100)
-            val minValue = array.getInteger(R.styleable.NumberPicker_picker_min, 0)
-            val stepSize = array.getInteger(R.styleable.NumberPicker_picker_stepSize, 1)
-            val orientation = array.getInteger(R.styleable.NumberPicker_picker_orientation, LinearLayout.VERTICAL)
-            val value = array.getInteger(R.styleable.NumberPicker_android_progress, 0)
+            val maxValue = array.getFloat(R.styleable.NumberPicker_picker_max, 100f)
+            val minValue = array.getFloat(R.styleable.NumberPicker_picker_min, 0f)
+            val stepSize = array.getFloat(R.styleable.NumberPicker_picker_stepSize, 1f)
+            val orientation = array.getInteger(R.styleable.NumberPicker_picker_orientation, VERTICAL)
+            val value = array.getFloat(R.styleable.NumberPicker_picker_progress, 0f)
             arrowStyle = array.getResourceId(R.styleable.NumberPicker_picker_arrowStyle, 0)
             background = array.getDrawable(R.styleable.NumberPicker_android_background)
             editTextStyleId = array.getResourceId(R.styleable.NumberPicker_picker_editTextStyle, R.style.NumberPicker_EditTextStyle)
@@ -354,7 +361,7 @@ class NumberPicker @JvmOverloads constructor(
 
             if (!hasFocus) {
                 if (!editText.text.isNullOrEmpty()) {
-                    setProgress(Integer.valueOf(editText.text.toString()), true)
+                    setProgress(editText.text.toString().toFloatOrNull() ?: data.value, true)
                 } else {
                     editText.setText(data.value.toString())
                 }
@@ -444,8 +451,8 @@ class NumberPicker @JvmOverloads constructor(
         const val TRACKER_LINEAR = 0
         const val TRACKER_EXPONENTIAL = 1
 
-        const val ARROW_BUTTON_INITIAL_DELAY = 800L
-        const val ARROW_BUTTON_FRAME_DELAY = 16L
+        const val ARROW_BUTTON_INITIAL_DELAY = 500L
+        const val ARROW_BUTTON_FRAME_DELAY = 40L
         const val LONG_TAP_TIMEOUT = 300L
 
         val FOCUSED_STATE_ARRAY = intArrayOf(android.R.attr.state_focused)
@@ -456,22 +463,22 @@ class NumberPicker @JvmOverloads constructor(
 }
 
 
-class Data(value: Int, minValue: Int, maxValue: Int, var stepSize: Int, val orientation: Int) {
-    var value: Int = value
+class Data(value: Float, minValue: Float, maxValue: Float, var stepSize: Float, val orientation: Int) {
+    var value: Float = value
         set(value) {
             field = max(minValue, min(maxValue, value))
         }
 
-    var maxValue: Int = maxValue
+    var maxValue: Float = maxValue
         set(newValue) {
             if (newValue < minValue) throw IllegalArgumentException("maxValue cannot be less than minValue")
             field = newValue
             if (value > newValue) value = newValue
         }
 
-    var minValue: Int = minValue
+    var minValue: Float = minValue
         set(newValue) {
-            if (newValue > maxValue) throw IllegalArgumentException("minValue cannot be great than maxValue")
+            if (newValue > maxValue) throw IllegalArgumentException("minValue cannot be greater than maxValue")
             field = newValue
             if (newValue > value) value = newValue
         }
@@ -482,10 +489,10 @@ internal abstract class Tracker(
         val numberPicker: NumberPicker,
         private val maxDistance: Int,
         val orientation: Int,
-        val callback: (Int) -> Unit) {
+        val callback: (Float) -> Unit) {
 
     internal var started: Boolean = false
-    internal var initialValue: Int = 0
+    internal var initialValue: Float = 0f
     internal var downPosition: Float = 0f
 
     @Suppress("MemberVisibilityCanBePrivate")
@@ -531,7 +538,7 @@ internal class ExponentialTracker(
         numberPicker: NumberPicker,
         maxDistance: Int,
         orientation: Int,
-        callback: (Int) -> Unit) : Tracker(numberPicker, maxDistance, orientation, callback) {
+        callback: (Float) -> Unit) : Tracker(numberPicker, maxDistance, orientation, callback) {
 
     private var time: Long = 1000L
     private var direction: Int = 0
@@ -593,7 +600,7 @@ internal class LinearTracker(
         numberPicker: NumberPicker,
         maxDistance: Int,
         orientation: Int,
-        callback: (Int) -> Unit) : Tracker(numberPicker, maxDistance, orientation, callback) {
+        callback: (Float) -> Unit) : Tracker(numberPicker, maxDistance, orientation, callback) {
 
 
     override fun addMovement(x: Float, y: Float) {
@@ -602,16 +609,16 @@ internal class LinearTracker(
 
         val diff: Float
         val perc: Float
-        var finalValue: Int
+        var finalValue: Float
 
         diff = max(-minDistance, min(currentPosition - downPosition, minDistance))
         perc = (diff / minDistance)
-        finalValue = initialValue + (abs(numberPicker.maxValue - numberPicker.minValue) * perc).toInt()
+        finalValue = initialValue + abs(numberPicker.maxValue - numberPicker.minValue) * perc
 
         var diffValue = finalValue - numberPicker.progress
 
-        if (numberPicker.stepSize > 1) {
-            if (diffValue % numberPicker.stepSize != 0) {
+        if (numberPicker.stepSize != 0f) {
+            if (diffValue % numberPicker.stepSize != 0f) {
                 diffValue -= (diffValue % numberPicker.stepSize)
             }
         }

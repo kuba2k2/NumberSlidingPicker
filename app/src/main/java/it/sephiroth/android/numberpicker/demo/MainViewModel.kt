@@ -5,9 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    val globalProgress: MutableLiveData<Int> = MutableLiveData<Int>().apply { value = 0 }
+    val globalProgress: MutableLiveData<Float> = MutableLiveData<Float>().apply { value = 0f }
 
-    val minValue: Int = -200
-    val maxValue: Int = 200
-    val defaultValue: Int = 0
+    val minValue: Float = 0f
+    val maxValue: Float = 1f
+    val defaultValue: Float = 0.5f
 }
